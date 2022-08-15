@@ -6,14 +6,14 @@ APPNAME=$(basename $0 | sed "s/\.sh$//")
 # Log functions
 # -----------------------------------------------------------------------------
 
-fn_log_info()  { echo "$APPNAME: $1"; }
-fn_log_warn()  { echo "$APPNAME: [WARNING] $1" 1>&2; }
-fn_log_error() { echo "$APPNAME: [ERROR] $1" 1>&2; }
+fn_log_info()  { echo "$APPNAME - $(date +'%d.%m.%Y %H:%M:%S'): $1"; }
+fn_log_warn()  { echo "$APPNAME - $(date +'%d.%m.%Y %H:%M:%S'): [WARNING] $1" 1>&2; }
+fn_log_error() { echo "$APPNAME - $(date +'%d.%m.%Y %H:%M:%S'): [ERROR] $1" 1>&2; }
 fn_log_info_cmd()  {
     if [ -n "$SSH_DEST_FOLDER_PREFIX" ]; then
-        echo "$APPNAME: $SSH_CMD '$1'";
+        echo "$APPNAME - $(date +'%d.%m.%Y %H:%M:%S'): $SSH_CMD '$1'";
     else
-        echo "$APPNAME: $1";
+        echo "$APPNAME - $(date +'%d.%m.%Y %H:%M:%S'): $1";
     fi
 }
 

@@ -82,13 +82,6 @@ fn_find_backups() {
 }
 
 fn_expire_backup() {
-    # Double-check that we're on a backup destination to be completely
-    # sure we're deleting the right folder
-    if [ -z "$(fn_find_backup_marker "$(dirname -- "$1")")" ]; then
-        fn_log_error "$1 is not on a backup destination - aborting."
-        exit 1
-    fi
-
     fn_log_info "Expiring $1"
     fn_rm_dir "$1"
 }
@@ -408,18 +401,6 @@ done
 # -----------------------------------------------------------------------------
 
 # TODO: check that the destination supports hard links
-
-fn_backup_marker_path() { echo "$1/backup.marker"; }
-fn_find_backup_marker() { fn_find "$(fn_backup_marker_path "$1")" 2>/dev/null; }
-
-if [ -z "$(fn_find_backup_marker "$DEST_FOLDER")" ]; then
-    fn_log_info "Safety check failed - the destination does not appear to be a backup folder or drive (marker file not found)."
-    fn_log_info "If it is indeed a backup folder, you may add the marker file by running the following command:"
-    fn_log_info ""
-    fn_log_info_cmd "mkdir -p -- \"$DEST_FOLDER\" ; touch \"$(fn_backup_marker_path "$DEST_FOLDER")\""
-    fn_log_info ""
-    exit 1
-fi
 
 # Check source and destination file-system (df -T /dest).
 # If one of them is FAT, use the --modify-window rsync parameter

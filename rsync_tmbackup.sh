@@ -181,9 +181,9 @@ fn_parse_ssh() {
 		SSH_HOST=$(echo "$DEST_FOLDER" | sed -E  's/^([A-Za-z0-9\._%\+\-]+)@([A-Za-z0-9.\-]+)\:(.+)$/\2/')
 		SSH_DEST_FOLDER=$(echo "$DEST_FOLDER" | sed -E  's/^([A-Za-z0-9\._%\+\-]+)@([A-Za-z0-9.\-]+)\:(.+)$/\3/')
 		if [ -n "$ID_RSA" ] ; then
-			SSH_CMD="ssh -p $SSH_PORT -i $ID_RSA ${SSH_USER}@${SSH_HOST}"
+			SSH_CMD="ssh -p $SSH_PORT -i $ID_RSA ${SSH_USER}@${SSH_HOST} -o StrictHostKeyChecking=no"
 		else
-			SSH_CMD="ssh -p $SSH_PORT ${SSH_USER}@${SSH_HOST}"
+			SSH_CMD="ssh -p $SSH_PORT ${SSH_USER}@${SSH_HOST} -o StrictHostKeyChecking=no"
 		fi
 		SSH_DEST_FOLDER_PREFIX="${SSH_USER}@${SSH_HOST}:"
 	elif echo "$SRC_FOLDER"|grep -Eq '^[A-Za-z0-9\._%\+\-]+@[A-Za-z0-9.\-]+\:.+$'
@@ -228,6 +228,10 @@ fn_get_absolute_path() {
 
 fn_mkdir() {
 	fn_run_cmd "mkdir -p -- '$1'"
+}
+
+fn_chown() {
+	fn_run_cmd "chown -- $1:$2 '$3'"
 }
 
 # Removes a file or symlink - not for directories
@@ -279,6 +283,8 @@ LOG_DIR="$HOME/.$APPNAME"
 AUTO_DELETE_LOG="1"
 EXPIRATION_STRATEGY="1:1 30:7 365:30"
 AUTO_EXPIRE="1"
+DEST_OWNER=""
+DEST_GROUP=""
 
 RSYNC_FLAGS="-D --numeric-ids --links --hard-links --one-file-system --itemize-changes --times --recursive --perms --owner --group --stats --human-readable"
 
@@ -321,6 +327,14 @@ while :; do
 		--no-auto-expire)
 			AUTO_EXPIRE="0"
 			;;
+        --dest-owner)
+            shift
+            DEST_OWNER="$1"
+            ;;
+        --dest-group)
+            shift
+            DEST_GROUP="$1"
+            ;;
 		--)
 			shift
 			SRC_FOLDER="$1"
@@ -519,6 +533,7 @@ while : ; do
 	if [ -z "$(fn_find "$DEST -type d" 2>/dev/null)" ]; then
 		fn_log_info "Creating destination $SSH_DEST_FOLDER_PREFIX$DEST"
 		fn_mkdir "$DEST"
+		fn_chown "$DEST_OWNER" "$DEST_GROUP" "$DEST"
 	fi
 
 	# -----------------------------------------------------------------------------
@@ -547,9 +562,9 @@ while : ; do
 	if [ -n "$SSH_CMD" ]; then
 		RSYNC_FLAGS="$RSYNC_FLAGS --compress"
 		if [ -n "$ID_RSA" ] ; then
-			CMD="$CMD  -e 'ssh -p $SSH_PORT -i $ID_RSA -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'"
+			CMD="$CMD  -e 'ssh -p $SSH_PORT -i $ID_RSA -o StrictHostKeyChecking=no'"
 		else
-			CMD="$CMD  -e 'ssh -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'"
+			CMD="$CMD  -e 'ssh -p $SSH_PORT -o StrictHostKeyChecking=no'"
 		fi
 	fi
 	CMD="$CMD $RSYNC_FLAGS"
@@ -559,7 +574,7 @@ while : ; do
 		CMD="$CMD --exclude-from '$EXCLUSION_FILE'"
 	fi
 	CMD="$CMD $LINK_DEST_OPTION"
-	CMD="$CMD -- '$SSH_SRC_FOLDER_PREFIX$SRC_FOLDER/' '$SSH_DEST_FOLDER_PREFIX$DEST/'"
+	CMD="$CMD -- $SSH_SRC_FOLDER_PREFIX$SRC_FOLDER/ $SSH_DEST_FOLDER_PREFIX$DEST/"
 
 	fn_log_info "Running command:"
 	fn_log_info "$CMD"

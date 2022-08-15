@@ -324,6 +324,10 @@ while :; do
 			LOG_DIR="$1"
 			AUTO_DELETE_LOG="0"
 			;;
+        --log-file)
+            shift
+            LOG_FILE="$1"
+            ;;
 		--no-auto-expire)
 			AUTO_EXPIRE="0"
 			;;
@@ -551,8 +555,9 @@ while : ; do
 	# -----------------------------------------------------------------------------
 	# Start backup
 	# -----------------------------------------------------------------------------
-
-	LOG_FILE="$LOG_DIR/$(date +"%Y-%m-%d-%H%M%S").log"
+    if [ -z "$LOG_FILE" ]; then
+	    LOG_FILE="$LOG_DIR/$(date +"%Y-%m-%d-%H%M%S").log"
+    fi
 
 	fn_log_info "Starting backup..."
 	fn_log_info "From: $SSH_SRC_FOLDER_PREFIX$SRC_FOLDER/"

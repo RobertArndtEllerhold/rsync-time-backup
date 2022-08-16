@@ -273,7 +273,8 @@ SRC_FOLDER=""
 DEST_FOLDER=""
 EXCLUSION_FILE=""
 LOG_DIR="$HOME/.$APPNAME"
-AUTO_DELETE_LOG="1"
+LOG_FILE_INFINITE=""
+LOG_FILE_AUTO_DELETE="1"
 EXPIRATION_STRATEGY="1:1 30:7 365:30"
 AUTO_EXPIRE="1"
 DEST_OWNER=""
@@ -315,11 +316,14 @@ while :; do
         --log-dir)
             shift
             LOG_DIR="$1"
-            AUTO_DELETE_LOG="0"
             ;;
-        --log-file)
+        --log-auto-delete)
             shift
-            LOG_FILE="$1"
+            LOG_FILE_AUTO_DELETE="$1"
+            ;;
+        --log-file-inifinite)
+            shift
+            LOG_FILE_INFINITE="$1"
             ;;
         --no-auto-expire)
             AUTO_EXPIRE="0"
@@ -538,8 +542,6 @@ while : ; do
     # -----------------------------------------------------------------------------
     if [ -z "$LOG_FILE" ]; then
         LOG_FILE="$LOG_DIR/$(date +"%Y-%m-%d-%H%M%S").log"
-    else
-        LOG_FILE="$LOG_DIR/$LOG_FILE"
     fi
 
     fn_log_info "Starting backup..."
@@ -607,10 +609,15 @@ while : ; do
         fn_log_warn "Rsync reported a warning. Run this command for more details: grep -E 'rsync:|rsync error:' '$LOG_FILE'"
     else
         fn_log_info "Backup completed without errors."
-        if [[ $AUTO_DELETE_LOG == "1" ]]; then
-            rm -f -- "$LOG_FILE"
-        fi
         EXIT_CODE="0"
+    fi
+
+    if [ -n "$LOG_FILE_INFINITE" ]; then
+        cat "$LOG_FILE" >> "$LOG_FILE_INFINITE"
+    fi
+
+    if [[ $LOG_FILE_AUTO_DELETE == "1" ]]; then
+        rm -f -- "$LOG_FILE"
     fi
 
     # -----------------------------------------------------------------------------

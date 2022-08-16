@@ -43,6 +43,7 @@ fn_display_usage() {
     echo " --rsync-set-flags      Set the rsync flags that are going to be used for backup."
     echo " --rsync-append-flags   Append the rsync flags that are going to be used for backup."
     echo " --log-dir              Set the log file directory. If this flag is set, generated files will"
+    echo " --log-file-inifinite"
     echo "                        not be managed by the script - in particular they will not be"
     echo "                        automatically deleted."
     echo "                        Default: $LOG_DIR"
@@ -273,7 +274,6 @@ SRC_FOLDER=""
 DEST_FOLDER=""
 EXCLUSION_FILE=""
 LOG_DIR="$HOME/.$APPNAME"
-LOG_FILE_INFINITE=""
 LOG_FILE_AUTO_DELETE="1"
 EXPIRATION_STRATEGY="1:1 30:7 365:30"
 AUTO_EXPIRE="1"
@@ -318,9 +318,7 @@ while :; do
             LOG_DIR="$1"
             LOG_FILE_AUTO_DELETE="0"
             ;;
-        --log-file-inifinite)
-            shift
-            LOG_FILE_INFINITE="$1"
+        --log-auto-delete)
             LOG_FILE_AUTO_DELETE="1"
             ;;
         --no-auto-expire)
@@ -608,10 +606,6 @@ while : ; do
     else
         fn_log_info "Backup completed without errors."
         EXIT_CODE="0"
-    fi
-
-    if [ -n "$LOG_FILE_INFINITE" ]; then
-        cat "$LOG_FILE" >> "$LOG_DIR/$LOG_FILE_INFINITE"
     fi
 
     if [[ $LOG_FILE_AUTO_DELETE == "1" ]]; then

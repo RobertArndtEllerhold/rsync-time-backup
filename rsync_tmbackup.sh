@@ -319,7 +319,7 @@ while :; do
             ;;
         --log-auto-delete)
             shift
-            LOG_FILE_AUTO_DELETE="$1"
+            LOG_FILE_AUTO_DELETE="1"
             ;;
         --log-file-inifinite)
             shift

@@ -275,6 +275,7 @@ DEST_FOLDER=""
 EXCLUSION_FILE=""
 LOG_DIR="$HOME/.$APPNAME"
 LOG_FILE_AUTO_DELETE="1"
+LOG_FILE_INFINITE=""
 EXPIRATION_STRATEGY="1:1 30:7 365:30"
 AUTO_EXPIRE="1"
 DEST_OWNER=""
@@ -318,7 +319,9 @@ while :; do
             LOG_DIR="$1"
             LOG_FILE_AUTO_DELETE="0"
             ;;
-        --log-auto-delete)
+        --log-file-infinite)
+            shift
+            LOG_FILE_INFINITE="$1"
             LOG_FILE_AUTO_DELETE="1"
             ;;
         --no-auto-expire)
@@ -598,6 +601,10 @@ while : ; do
     # -----------------------------------------------------------------------------
     # Check whether rsync reported any errors
     # -----------------------------------------------------------------------------
+
+    if [ -n "$LOG_FILE_INFINITE" ]; then
+        cat "$LOG_FILE" >> "$LOG_DIR/$LOG_FILE_INFINITE"
+    fi
 
     EXIT_CODE="1"
     if [ -n "$(grep "rsync error:" "$LOG_FILE")" ]; then

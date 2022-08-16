@@ -538,6 +538,8 @@ while : ; do
     # -----------------------------------------------------------------------------
     if [ -z "$LOG_FILE" ]; then
         LOG_FILE="$LOG_DIR/$(date +"%Y-%m-%d-%H%M%S").log"
+    else
+        LOG_FILE="$LOG_DIR/$LOG_FILE"
     fi
 
     fn_log_info "Starting backup..."

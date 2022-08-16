@@ -611,7 +611,7 @@ while : ; do
     fi
 
     if [ -n "$LOG_FILE_INFINITE" ]; then
-        cat "$LOG_FILE" >> "$LOG_FILE_INFINITE"
+        cat "$LOG_FILE" >> "$LOG_DIR/$LOG_FILE_INFINITE"
     fi
 
     if [[ $LOG_FILE_AUTO_DELETE == "1" ]]; then

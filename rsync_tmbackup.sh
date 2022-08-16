@@ -316,14 +316,12 @@ while :; do
         --log-dir)
             shift
             LOG_DIR="$1"
-            ;;
-        --log-auto-delete)
-            shift
-            LOG_FILE_AUTO_DELETE="1"
+            LOG_FILE_AUTO_DELETE="0"
             ;;
         --log-file-inifinite)
             shift
             LOG_FILE_INFINITE="$1"
+            LOG_FILE_AUTO_DELETE="1"
             ;;
         --no-auto-expire)
             AUTO_EXPIRE="0"

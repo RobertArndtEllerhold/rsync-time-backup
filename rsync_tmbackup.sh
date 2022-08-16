@@ -43,7 +43,7 @@ fn_display_usage() {
     echo " --rsync-set-flags      Set the rsync flags that are going to be used for backup."
     echo " --rsync-append-flags   Append the rsync flags that are going to be used for backup."
     echo " --log-dir              Set the log file directory. If this flag is set, generated files will"
-    echo " --log-file-inifinite"
+    echo " --log-auto-delete"     Set to delete the logfiles
     echo "                        not be managed by the script - in particular they will not be"
     echo "                        automatically deleted."
     echo "                        Default: $LOG_DIR"
@@ -561,6 +561,7 @@ while : ; do
     fi
     CMD="$CMD $LINK_DEST_OPTION"
     CMD="$CMD -- $SSH_SRC_FOLDER_PREFIX$SRC_FOLDER/ $SSH_DEST_FOLDER_PREFIX$DEST/"
+    CMD="$CMD &> /dev/null"
 
     fn_log_info "Running command:"
     fn_log_info "$CMD"

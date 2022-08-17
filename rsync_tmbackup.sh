@@ -203,7 +203,6 @@ fn_parse_ssh() {
 fn_run_cmd() {
     if [ -n "$SSH_DEST_FOLDER_PREFIX" ]
     then
-        echo "$SSH_CMD '$1'"
         eval "$SSH_CMD '$1'"
     else
         eval $1

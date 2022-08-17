@@ -539,7 +539,6 @@ while : ; do
     if [ -z "$(fn_find "$DEST -type d" 2>/dev/null)" ]; then
         fn_log_info "Creating destination $SSH_DEST_FOLDER_PREFIX$DEST"
         fn_mkdir "$DEST"
-        fn_chown "$DEST_OWNER" "$DEST_GROUP" "$DEST"
     fi
 
     # -----------------------------------------------------------------------------
@@ -597,6 +596,8 @@ while : ; do
 
     fn_run_cmd "echo $MYPID > $INPROGRESS_FILE"
     eval $CMD
+
+    fn_chown "$DEST_OWNER" "$DEST_GROUP" "$DEST"
 
     # -----------------------------------------------------------------------------
     # Check if we ran out of space

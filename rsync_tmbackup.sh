@@ -231,11 +231,7 @@ fn_mkdir() {
 }
 
 fn_chown() {
-    fn_run_cmd "chown -R -- $1 '$3'"
-}
-
-fn_chown() {
-    fn_run_cmd "chmod -R -- '$1' '$3'"
+    fn_run_cmd "chown -R -- $1 '$2'"
 }
 
 # Removes a file or symlink - not for directories
@@ -543,6 +539,12 @@ while : ; do
     if [ -z "$(fn_find "$DEST -type d" 2>/dev/null)" ]; then
         fn_log_info "Creating destination $SSH_DEST_FOLDER_PREFIX$DEST"
         fn_mkdir "$DEST"
+
+        CHOWN_PATH="$DEST"
+        if [ -n "$OWNER_BASE" ]; then
+            CHOWN_PATH="$OWNER_BASE"
+        fi
+        fn_chown "$OWNER" "$CHOWN_PATH"
     fi
 
     # -----------------------------------------------------------------------------
@@ -601,11 +603,7 @@ while : ; do
     fn_run_cmd "echo $MYPID > $INPROGRESS_FILE"
     eval $CMD
 
-    CHOWN_PATH="$DEST"
-    if [ -n "$OWNER_BASE" ]; then
-        CHOWN_PATH="$OWNER_BASE"
-    fi
-    fn_chown "$OWNER" "$CHOWN_PATH"
+    fn_chown "$OWNER" "$DEST"
 
     # -----------------------------------------------------------------------------
     # Check if we ran out of space

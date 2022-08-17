@@ -521,9 +521,13 @@ while : ; do
     # Check if we are doing an incremental backup (if previous backup exists).
     # -----------------------------------------------------------------------------
 
+    CHOWN_PATH="$DEST"
     LINK_DEST_OPTION=""
     if [ -z "$PREVIOUS_DEST" ]; then
         fn_log_info "No previous backup - creating new one."
+        if [ -n "$OWNER_BASE" ]; then
+            CHOWN_PATH="$OWNER_BASE"
+        fi
     else
         # If the path is relative, it needs to be relative to the destination. To keep
         # it simple, just use an absolute path. See http://serverfault.com/a/210058/118679
@@ -539,11 +543,6 @@ while : ; do
     if [ -z "$(fn_find "$DEST -type d" 2>/dev/null)" ]; then
         fn_log_info "Creating destination $SSH_DEST_FOLDER_PREFIX$DEST"
         fn_mkdir "$DEST"
-
-        CHOWN_PATH="$DEST"
-        if [ -n "$OWNER_BASE" ]; then
-            CHOWN_PATH="$OWNER_BASE"
-        fi
         fn_chown "$OWNER" "$CHOWN_PATH"
     fi
 

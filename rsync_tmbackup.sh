@@ -52,8 +52,8 @@ fn_display_usage() {
     echo "                        After 365 days keep one backup every 30 days."
     echo " --no-auto-expire       Disable automatically deleting backups when out of space. Instead an error"
     echo "                        is logged, and the backup is aborted."
-    echo " --dest-owner           Set the Owner of the destination folder."
-    echo " --dest-group           Set the Owner Group of the destination folder."
+    echo " --owner                Set the Owner of the destination folder."
+    echo " --owner-base           If set, Set the Owner this folder."
     echo " --include-file         Include all Files listed in this file."
     echo " --exclude-file         Exclude all Files listed in this file."
     echo " --extend-exclude-file  Exclude all Files listed in this file. This is usefull, when you combine exclude files"
@@ -203,6 +203,7 @@ fn_parse_ssh() {
 fn_run_cmd() {
     if [ -n "$SSH_DEST_FOLDER_PREFIX" ]
     then
+        echo "$SSH_CMD '$1'"
         eval "$SSH_CMD '$1'"
     else
         eval $1
@@ -231,7 +232,11 @@ fn_mkdir() {
 }
 
 fn_chown() {
-    fn_run_cmd "chown -- $1:$2 '$3'"
+    fn_run_cmd "chown -R -- $1 '$3'"
+}
+
+fn_chown() {
+    fn_run_cmd "chmod -R -- '$1' '$3'"
 }
 
 # Removes a file or symlink - not for directories
@@ -286,8 +291,8 @@ LOG_FILE_AUTO_DELETE="1"
 LOG_FILE_INFINITE=""
 EXPIRATION_STRATEGY="1:1 30:7 365:30"
 AUTO_EXPIRE="1"
-DEST_OWNER=""
-DEST_GROUP=""
+OWNER=""
+OWNER_BASE=""
 
 RSYNC_FLAGS="-D --numeric-ids --links --hard-links --one-file-system --itemize-changes --times --recursive --perms --owner --group --stats --human-readable"
 
@@ -335,13 +340,13 @@ while :; do
         --no-auto-expire)
             AUTO_EXPIRE="0"
             ;;
-        --dest-owner)
+        --owner)
             shift
-            DEST_OWNER="$1"
+            OWNER="$1"
             ;;
-        --dest-group)
+        --owner-base)
             shift
-            DEST_GROUP="$1"
+            OWNER_BASE="$1"
             ;;
         --include-file)
             shift
@@ -597,7 +602,11 @@ while : ; do
     fn_run_cmd "echo $MYPID > $INPROGRESS_FILE"
     eval $CMD
 
-    fn_chown "$DEST_OWNER" "$DEST_GROUP" "$DEST"
+    CHOWN_PATH="$DEST"
+    if [ -n "$OWNER_BASE" ]; then
+        CHOWN_PATH="$OWNER_BASE"
+    fi
+    fn_chown "$OWNER" "$CHOWN_PATH"
 
     # -----------------------------------------------------------------------------
     # Check if we ran out of space

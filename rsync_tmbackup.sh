@@ -32,12 +32,12 @@ trap 'fn_terminate_script' SIGINT
 # Small utility functions for reducing code duplication
 # -----------------------------------------------------------------------------
 fn_display_usage() {
-    echo "Usage: $(basename $0) [OPTION]... <[USER@HOST:]SOURCE> <[USER@HOST:]DESTINATION> [exclude-pattern-file]"
+    echo "Usage: $(basename $0) [OPTION]... <[USER@HOST:]SOURCE> <[USER@HOST:]DESTINATION>"
     echo ""
     echo "Options"
     echo " -p, --port             SSH port."
     echo " -h, --help             Display this help message."
-    echo " -i, --id_rsa           Specify the private ssh key to use."
+    echo " -i, --id-rsa           Specify the private ssh key to use."
     echo " --rsync-get-flags      Display the default rsync flags that are used for backup. If using remote"
     echo "                        drive over SSH, --compress will be added."
     echo " --rsync-set-flags      Set the rsync flags that are going to be used for backup."
@@ -301,7 +301,7 @@ while :; do
             shift
             SSH_PORT=$1
             ;;
-        -i|--id_rsa)
+        -i|--id-rsa)
             shift
             ID_RSA="$1"
             ;;

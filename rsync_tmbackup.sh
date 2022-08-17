@@ -43,7 +43,7 @@ fn_display_usage() {
     echo " --rsync-set-flags      Set the rsync flags that are going to be used for backup."
     echo " --rsync-append-flags   Append the rsync flags that are going to be used for backup."
     echo " --log-dir              Set the log file directory. If this flag is set, generated files will"
-    echo " --log-auto-delete"     Set to delete the logfiles
+    echo " --log-file-infinite    If this file is set, the rsync-log will allways pasted into this file and deleted."
     echo "                        not be managed by the script - in particular they will not be"
     echo "                        automatically deleted."
     echo "                        Default: $LOG_DIR"
@@ -52,6 +52,12 @@ fn_display_usage() {
     echo "                        After 365 days keep one backup every 30 days."
     echo " --no-auto-expire       Disable automatically deleting backups when out of space. Instead an error"
     echo "                        is logged, and the backup is aborted."
+    echo " --dest-owner           Set the Owner of the destination folder."
+    echo " --dest-group           Set the Owner Group of the destination folder."
+    echo " --include-file         Include all Files listed in this file."
+    echo " --exclude-file         Exclude all Files listed in this file."
+    echo " --extend-exclude-file  Exclude all Files listed in this file. This is usefull, when you combine exclude files"
+    echo "                        from different sources."
     echo ""
     echo "For more detailed help, please see the README file:"
     echo ""
@@ -273,6 +279,8 @@ ID_RSA=""
 SRC_FOLDER=""
 DEST_FOLDER=""
 EXCLUSION_FILE=""
+EXTEND_EXCLUSION_FILE=""
+INCLUSION_FILE=""
 LOG_DIR="$HOME/.$APPNAME"
 LOG_FILE_AUTO_DELETE="1"
 LOG_FILE_INFINITE=""
@@ -335,11 +343,22 @@ while :; do
             shift
             DEST_GROUP="$1"
             ;;
+        --include-file)
+            shift
+            INCLUSION_FILE="$1"
+            ;;
+        --exclude-file)
+            shift
+            EXCLUSION_FILE="$1"
+            ;;
+        --extend-exclude-file)
+            shift
+            EXTEND_EXCLUSION_FILE="$1"
+            ;;
         --)
             shift
             SRC_FOLDER="$1"
             DEST_FOLDER="$2"
-            EXCLUSION_FILE="$3"
             break
             ;;
         -*)
@@ -351,7 +370,6 @@ while :; do
         *)
             SRC_FOLDER="$1"
             DEST_FOLDER="$2"
-            EXCLUSION_FILE="$3"
             break
     esac
 
@@ -392,7 +410,7 @@ fi
 # Now strip off last slash from source folder.
 SRC_FOLDER="${SRC_FOLDER%/}"
 
-for ARG in "$SRC_FOLDER" "$DEST_FOLDER" "$EXCLUSION_FILE"; do
+for ARG in "$SRC_FOLDER" "$DEST_FOLDER" "$EXCLUSION_FILE" "$INCLUSION_FILE" "$EXTEND_EXCLUSION_FILE"; do
     if [[ "$ARG" == *"'"* ]]; then
         fn_log_error 'Source and destination directories may not contain single quote characters.'
         exit 1
@@ -558,9 +576,17 @@ while : ; do
     fi
     CMD="$CMD $RSYNC_FLAGS"
     CMD="$CMD --log-file '$LOG_FILE'"
-    if [ -n "$EXCLUSION_FILE" ]; then
+    if [ -n "$INCLUSION_FILE" ] && [ -f "$INCLUSION_FILE" ]; then
+        # We've already checked that $INCLUSION_FILE doesn't contain a single quote
+        CMD="$CMD --include-from '$INCLUSION_FILE'"
+    fi
+    if [ -n "$EXCLUSION_FILE" ] && [ -f "$EXCLUSION_FILE" ]; then
         # We've already checked that $EXCLUSION_FILE doesn't contain a single quote
         CMD="$CMD --exclude-from '$EXCLUSION_FILE'"
+    fi
+    if [ -n "$EXTEND_EXCLUSION_FILE" ] && [ -f "$EXTEND_EXCLUSION_FILE" ]; then
+        # We've already checked that $EXTEND_EXCLUSION_FILE doesn't contain a single quote
+        CMD="$CMD --exclude-from '$EXTEND_EXCLUSION_FILE'"
     fi
     CMD="$CMD $LINK_DEST_OPTION"
     CMD="$CMD -- $SSH_SRC_FOLDER_PREFIX$SRC_FOLDER/ $SSH_DEST_FOLDER_PREFIX$DEST/"

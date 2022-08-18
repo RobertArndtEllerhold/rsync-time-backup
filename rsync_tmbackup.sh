@@ -55,9 +55,11 @@ fn_display_usage() {
     echo " --owner                Set the Owner of the destination folder."
     echo " --owner-base           If set, Set the Owner this folder."
     echo " --include-file         Include all Files listed in this file."
+    echo " --extend-include-file  Include all Files listed in this file. This is usefull, when you combine include files"
+    echo "                        from different sources, e.g. user specific."
     echo " --exclude-file         Exclude all Files listed in this file."
     echo " --extend-exclude-file  Exclude all Files listed in this file. This is usefull, when you combine exclude files"
-    echo "                        from different sources."
+    echo "                        from different sources, e.g. user specific."
     echo ""
     echo "For more detailed help, please see the README file:"
     echo ""
@@ -281,6 +283,7 @@ DEST_FOLDER=""
 EXCLUSION_FILE=""
 EXTEND_EXCLUSION_FILE=""
 INCLUSION_FILE=""
+EXTEND_INCLUSION_FILE=""
 LOG_DIR="$HOME/.$APPNAME"
 LOG_FILE_AUTO_DELETE="1"
 LOG_FILE_INFINITE=""
@@ -347,6 +350,10 @@ while :; do
             shift
             INCLUSION_FILE="$1"
             ;;
+        --extend-include-file)
+            shift
+            EXTEND_INCLUSION_FILE="$1"
+            ;;
         --exclude-file)
             shift
             EXCLUSION_FILE="$1"
@@ -410,7 +417,7 @@ fi
 # Now strip off last slash from source folder.
 SRC_FOLDER="${SRC_FOLDER%/}"
 
-for ARG in "$SRC_FOLDER" "$DEST_FOLDER" "$EXCLUSION_FILE" "$INCLUSION_FILE" "$EXTEND_EXCLUSION_FILE"; do
+for ARG in "$SRC_FOLDER" "$DEST_FOLDER" "$EXCLUSION_FILE" "$INCLUSION_FILE" "$EXTEND_EXCLUSION_FILE" "$EXTEND_INCLUSION_FILE"; do
     if [[ "$ARG" == *"'"* ]]; then
         fn_log_error 'Source and destination directories may not contain single quote characters.'
         exit 1
@@ -583,6 +590,10 @@ while : ; do
     if [ -n "$INCLUSION_FILE" ] && [ -f "$INCLUSION_FILE" ]; then
         # We've already checked that $INCLUSION_FILE doesn't contain a single quote
         CMD="$CMD --include-from '$INCLUSION_FILE'"
+    fi
+    if [ -n "$EXTEND_INCLUSION_FILE" ] && [ -f "$EXTEND_INCLUSION_FILE" ]; then
+        # We've already checked that $EXTEND_INCLUSION_FILE doesn't contain a single quote
+        CMD="$CMD --include-from '$EXTEND_INCLUSION_FILE'"
     fi
     if [ -n "$EXCLUSION_FILE" ] && [ -f "$EXCLUSION_FILE" ]; then
         # We've already checked that $EXCLUSION_FILE doesn't contain a single quote
